@@ -1,11 +1,3 @@
-To install dependencies:
-```sh
-bun install
-```
+# hono-lab
 
-To run:
-```sh
-bun run dev
-```
-
-open http://localhost:3000
+Learning Hono, Bun, and modern backend development.
