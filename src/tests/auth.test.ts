@@ -1,6 +1,30 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { prisma } from "../lib/prisma";
-import app from "..";
+import { afterAll, beforeAll, describe, expect, it, mock } from "bun:test";
+
+mock.module("../lib/email", () => ({
+  sendVerificationEmail: mock(async () => {}),
+}));
+
+mock.module("../lib/rate-limit", () => ({
+  authRateLimit: {
+    limit: mock(async () => ({
+      success: true,
+      limit: 5,
+      remaining: 4,
+      reset: Date.now() + 60_000,
+    })),
+  },
+  apiRateLimit: {
+    limit: mock(async () => ({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60_000,
+    })),
+  },
+}));
+
+const { default: app } = await import("..");
+const { prisma } = await import("../lib/prisma");
 
 const testUser = {
   name: "Haikal test",
@@ -75,6 +99,15 @@ describe("POST /auth/register", () => {
 });
 
 describe("POST /auth/login", () => {
+  beforeAll(async () => {
+    await prisma.user.update({
+      where: { email: testUser.email },
+      data: {
+        isVerified: true,
+      },
+    });
+  });
+
   it("should login successfully", async () => {
     const res = await post("/auth/login", {
       email: testUser.email,
