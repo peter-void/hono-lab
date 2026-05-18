@@ -11,10 +11,13 @@ import {
   taskQuerySchema,
   updateTaskSchema,
 } from "../validators/task.validator";
+import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
+import { apiRateLimit } from "../lib/rate-limit";
 
 const tasks = new Hono<{ Variables: Variables }>();
 
 tasks.use(authMiddleware);
+tasks.use(createRateLimitMiddleware(apiRateLimit));
 
 tasks.get("/", zValidator("query", taskQuerySchema), async (c) => {
   const userId = c.get("userId");
