@@ -51,9 +51,6 @@ const del = (path: string, authToken?: string) =>
 beforeAll(async () => {
   await prisma.user.deleteMany({ where: { email: testUser.email } });
 
-  await post("/auth/register", testUser);
-  await prisma.user.deleteMany({ where: { email: testUser.email } });
-
   const hashed = await bcrypt.hash(testUser.password, 10);
   await prisma.user.create({
     data: { ...testUser, password: hashed },

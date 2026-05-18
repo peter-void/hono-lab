@@ -6,8 +6,12 @@ import { HTTPException } from "hono/http-exception";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { zValidator } from "../lib/validator";
+import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
+import { authRateLimit } from "../lib/rate-limit";
 
 const auth = new Hono<{ Variables: Variables }>();
+
+auth.use(createRateLimitMiddleware(authRateLimit));
 
 auth.post("/register", zValidator("json", registerSchema), async (c) => {
   const { name, email, password } = c.req.valid("json");
