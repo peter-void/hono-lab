@@ -13,6 +13,7 @@ import {
 } from "../validators/task.validator";
 import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
 import { apiRateLimit } from "../lib/rate-limit";
+import { cache, taskCacheKey } from "../lib/cache";
 
 const tasks = new Hono<{ Variables: Variables }>();
 
@@ -23,6 +24,13 @@ tasks.get("/", zValidator("query", taskQuerySchema), async (c) => {
   const userId = c.get("userId");
   const { status, priority, page, limit } = c.req.valid("query");
 
+  const cacheKey = taskCacheKey.list(userId, page, limit, status, priority);
+
+  const cached = await cache.get(cacheKey);
+  if (cached) {
+    return paginated(c, (cached as any).tasks, (cached as any).pagination);
+  }
+
   const skip = (page - 1) * limit;
 
   const where = {
@@ -31,7 +39,7 @@ tasks.get("/", zValidator("query", taskQuerySchema), async (c) => {
     ...(priority && { priority }),
   };
 
-  const [tasks, total] = await Promise.all([
+  const [taskList, total] = await Promise.all([
     prisma.task.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -47,14 +55,18 @@ tasks.get("/", zValidator("query", taskQuerySchema), async (c) => {
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
 
-  return paginated(c, tasks, {
+  const pagination = {
     total,
     page,
     limit,
     totalPages,
     hasNextPage,
     hasPrevPage,
-  });
+  };
+
+  await cache.set(cacheKey, { tasks: taskList, pagination });
+
+  return paginated(c, taskList, pagination);
 });
 
 tasks.get("/:id", zValidator("param", taskIdSchema), async (c) => {
@@ -87,6 +99,8 @@ tasks.post("/", zValidator("json", createTaskSchema), async (c) => {
     },
   });
 
+  await cache.delByPattern(taskCacheKey.pattern(userId));
+
   return created(c, task);
 });
 
@@ -116,6 +130,8 @@ tasks.put(
       data: body,
     });
 
+    await cache.delByPattern(taskCacheKey.pattern(userId));
+
     return ok(c, updatedTask, "Task updated");
   },
 );
@@ -139,6 +155,8 @@ tasks.delete("/:id", zValidator("param", taskIdSchema), async (c) => {
   await prisma.task.delete({
     where: { id },
   });
+
+  await cache.delByPattern(taskCacheKey.pattern(userId));
 
   return ok(c, undefined, "Task deleted");
 });
