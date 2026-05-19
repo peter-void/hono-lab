@@ -56,6 +56,9 @@ describe("Rate Limit Middleware", () => {
       reset: Date.now() + 30_000,
     }));
 
+    const testResult = await mockLimit();
+    console.log("Mock result:", testResult);
+
     const res = await post("/auth/login", {
       email: "haikal@gmail.com",
       password: "Password123",
