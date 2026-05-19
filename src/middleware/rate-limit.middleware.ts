@@ -1,10 +1,12 @@
-import type { Ratelimit } from "@upstash/ratelimit";
 import { createMiddleware } from "hono/factory";
-import { Variables } from "../types";
 import { HTTPException } from "hono/http-exception";
+import { apiRateLimit, authRateLimit } from "../lib/rate-limit";
+import { Variables } from "../types";
 
-export function createRateLimitMiddleware(limiter: Ratelimit) {
+export function createRateLimitMiddleware(type: "auth" | "api") {
   return createMiddleware<{ Variables: Variables }>(async (c, next) => {
+    const limiter = type === "auth" ? authRateLimit : apiRateLimit;
+
     const userId = c.get("userId");
     const ip =
       c.req.header("x-forwarded-for")?.split(",")[0].trim() ??

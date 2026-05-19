@@ -13,7 +13,7 @@ import { sendVerificationEmail } from "../lib/email";
 
 const auth = new Hono<{ Variables: Variables }>();
 
-auth.use(createRateLimitMiddleware(authRateLimit));
+auth.use(createRateLimitMiddleware("auth"));
 
 auth.post("/register", zValidator("json", registerSchema), async (c) => {
   const { name, email, password } = c.req.valid("json");
