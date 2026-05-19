@@ -49,12 +49,12 @@ describe("Rate Limit Middleware", () => {
   });
 
   it("should return 429 when rate limit exceeded", async () => {
-    mockLimit.mockResolvedValueOnce({
+    mockLimit.mockImplementation(async () => ({
       success: false,
       limit: 5,
       remaining: 0,
       reset: Date.now() + 30_000,
-    });
+    }));
 
     const res = await post("/auth/login", {
       email: "haikal@gmail.com",
