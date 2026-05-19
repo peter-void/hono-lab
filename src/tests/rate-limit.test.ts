@@ -12,6 +12,10 @@ mock.module("../lib/rate-limit", () => ({
   apiRateLimit: { limit: mockLimit },
 }));
 
+mock.module("../lib/email", () => ({
+  sendVerificationEmail: mock(async () => {}),
+}));
+
 const { default: app } = await import("..");
 
 const post = (path: string, body: unknown) => {

@@ -53,7 +53,7 @@ beforeAll(async () => {
 
   const hashed = await bcrypt.hash(testUser.password, 10);
   await prisma.user.create({
-    data: { ...testUser, password: hashed },
+    data: { ...testUser, password: hashed, isVerified: true },
   });
 
   const res = await post("/auth/login", {
