@@ -39,3 +39,20 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           APP_URL: ${{ secrets.APP_URL }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to railway
+        run: railway up --service hono-lab
+        env:
+          RAILWAY_TOKEN: ${{secrets.RAILWAY_TOKEN}}

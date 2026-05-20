@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { cache, taskCacheKey } from "../lib/cache";
 import { prisma } from "../lib/prisma";
 import { created, ok, paginated } from "../lib/response";
 import { zValidator } from "../lib/validator";
 import { authMiddleware } from "../middleware/auth";
+import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
 import { Variables } from "../types";
 import {
   createTaskSchema,
@@ -11,9 +13,6 @@ import {
   taskQuerySchema,
   updateTaskSchema,
 } from "../validators/task.validator";
-import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
-import { apiRateLimit } from "../lib/rate-limit";
-import { cache, taskCacheKey } from "../lib/cache";
 
 const tasks = new Hono<{ Variables: Variables }>();
 

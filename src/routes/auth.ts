@@ -1,15 +1,14 @@
-import { Hono } from "hono";
-import { Variables } from "../types";
-import { loginSchema, registerSchema } from "../validators/auth.validator";
-import { prisma } from "../lib/prisma";
-import { HTTPException } from "hono/http-exception";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import jwt from "jsonwebtoken";
+import { sendVerificationEmail } from "../lib/email";
+import { prisma } from "../lib/prisma";
 import { zValidator } from "../lib/validator";
 import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware";
-import { authRateLimit } from "../lib/rate-limit";
-import { randomBytes } from "crypto";
-import { sendVerificationEmail } from "../lib/email";
+import { Variables } from "../types";
+import { loginSchema, registerSchema } from "../validators/auth.validator";
 
 const auth = new Hono<{ Variables: Variables }>();
 

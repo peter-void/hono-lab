@@ -23,7 +23,7 @@ export const authMiddleware = createMiddleware<{ Variables: Variables }>(
       c.set("userEmail", decoded.email);
 
       await next();
-    } catch (error) {
+    } catch {
       throw new HTTPException(401, { message: "Invalid or expired token" });
     }
   },

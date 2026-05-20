@@ -42,7 +42,7 @@ export const created = <T>(
 
 export const paginated = <T>(
   c: Context,
-  data: T[],
+  data: T,
   pagination: SuccessResponse<T>["pagination"],
 ) => {
   return c.json(
@@ -50,7 +50,7 @@ export const paginated = <T>(
       success: true,
       data,
       pagination,
-    } satisfies SuccessResponse<T[]>,
+    } satisfies SuccessResponse<T>,
     200,
   );
 };
