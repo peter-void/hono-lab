@@ -56,3 +56,4 @@ jobs:
         run: railway up --service hono-lab
         env:
           RAILWAY_TOKEN: ${{secrets.RAILWAY_TOKEN}}
+          RAILWAY_PROJECT_ID: ee5266ca-3564-4776-a8b5-0004e07e9893
